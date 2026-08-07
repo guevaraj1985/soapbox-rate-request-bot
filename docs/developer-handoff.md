@@ -67,8 +67,8 @@ SLACK_BOT_TOKEN=
 SLACK_APP_TOKEN=
 SLACK_SIGNING_SECRET=
 RATE_REQUEST_CHANNEL_ID=
-RATE_REQUEST_TEMPLATE_URL=
-RATE_REQUEST_TEMPLATE_FILE_PATH=
+RATE_REQUEST_TEMPLATE_URL=https://soapboxinc.slack.com/files/ULLE6BL3E/F0BLMUC009E/data_request_template.xlsx
+RATE_REQUEST_TEMPLATE_FILE_PATH=./templates/Data Request Template.xlsx
 DATABASE_PATH=
 
 SALESFORCE_ENABLED=
@@ -86,6 +86,11 @@ SALESFORCE_LEAD_TYPE=Shipper (Brand)
 SALESFORCE_OPPORTUNITY_STAGE=Prospecting
 SALESFORCE_OPPORTUNITY_CLOSE_DAYS=30
 ```
+
+Template handling:
+
+- `RATE_REQUEST_TEMPLATE_URL` is the primary requester-facing template source. The current value points to the Slack-hosted `data_request_template.xlsx` file that all intended users can access.
+- `RATE_REQUEST_TEMPLATE_FILE_PATH` is kept as a backup for hosted deployments. The repo includes `templates/Data Request Template.xlsx`; if the hosted URL is removed later, the bot can DM that file on demand instead.
 
 Production should usually start with:
 

@@ -46,7 +46,7 @@ SLACK_BOT_TOKEN=xoxb-your-bot-token
 SLACK_APP_TOKEN=xapp-your-app-level-token
 SLACK_SIGNING_SECRET=your-signing-secret
 RATE_REQUEST_CHANNEL_ID=C08071S2P8E
-RATE_REQUEST_TEMPLATE_URL=
+RATE_REQUEST_TEMPLATE_URL=https://soapboxinc.slack.com/files/ULLE6BL3E/F0BLMUC009E/data_request_template.xlsx
 RATE_REQUEST_TEMPLATE_FILE_PATH=./templates/Data Request Template.xlsx
 DATABASE_PATH=./data/rate-requests.sqlite
 ```
@@ -55,10 +55,10 @@ Do not hardcode Slack tokens, user IDs, email addresses, or template URLs in sou
 
 ## Shipment Template
 
-You have two supported options:
+The current setup uses the Slack-hosted template as the primary option and keeps `templates/Data Request Template.xlsx` in the repo as a backup for future hosting.
 
-1. Hosted template link: set `RATE_REQUEST_TEMPLATE_URL` to a shared download URL. The modal will show a `Download Template` button.
-2. Local template attachment: save the template file inside the project, for example `templates/Data Request Template.xlsx`, then set `RATE_REQUEST_TEMPLATE_FILE_PATH=./templates/Data Request Template.xlsx`. The modal will show a `Send Template` button, and the bot will DM the file only when the requester clicks that button.
+1. Primary Slack link: set `RATE_REQUEST_TEMPLATE_URL` to the shared Slack file URL. The modal will show a `Download Template` button.
+2. Backup/local attachment: keep the template file inside the project, for example `templates/Data Request Template.xlsx`, and set `RATE_REQUEST_TEMPLATE_FILE_PATH=./templates/Data Request Template.xlsx`. If the hosted URL is blank later, the modal will show a `Send Template` button, and the bot will DM the file only when the requester clicks that button.
 
 For the local attachment option, add `files:write` to the Slack app OAuth scopes, reinstall the app to the workspace, and restart the bot. This uses Slack's current external upload flow through `filesUploadV2`; it does not use deprecated `files.upload`.
 
