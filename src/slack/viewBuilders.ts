@@ -74,7 +74,7 @@ export function buildRateRequestModal(input: {
     type: "section" as const,
     text: {
       type: "mrkdwn" as const,
-      text: "Submit a new rate request. Download and complete the shipment template when shipment-level data is required."
+      text: "Submit a new rate request. Download and complete the shipment template when shipment-level data is required. Add SKU data on Sheet 1 and order data on Sheet 2."
     },
     ...(templateAccessory ? { accessory: templateAccessory } : {})
   };

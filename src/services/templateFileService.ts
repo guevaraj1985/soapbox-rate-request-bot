@@ -21,6 +21,7 @@ export async function sendTemplateFileToRequester(client: WebClient, userId: str
     file: fs.createReadStream(templateFilePath),
     filename,
     title: filename,
-    initial_comment: "Here is the shipment template for your rate request. Complete and attach it when shipment-level data is required."
+    initial_comment:
+      "Here is the shipment template for your rate request. Complete and attach it when shipment-level data is required. Add SKU data on Sheet 1 and order data on Sheet 2."
   });
 }
