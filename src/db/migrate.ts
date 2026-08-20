@@ -6,10 +6,25 @@ import { createDatabase } from "./connection.js";
 import { logger } from "../utils/logger.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const migrationsDir = path.resolve(__dirname, "../../migrations");
+
+function resolveMigrationsDir() {
+  const candidates = [
+    path.resolve(__dirname, "../../migrations"),
+    path.resolve(__dirname, "../../../migrations"),
+    path.resolve(process.cwd(), "migrations")
+  ];
+
+  const migrationsDir = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!migrationsDir) {
+    throw new Error(`Migrations directory not found. Checked: ${candidates.join(", ")}`);
+  }
+
+  return migrationsDir;
+}
 
 export function runMigrations(databasePath = config.DATABASE_PATH) {
   const db = createDatabase(databasePath);
+  const migrationsDir = resolveMigrationsDir();
   const migrations = fs
     .readdirSync(migrationsDir)
     .filter((file) => file.endsWith(".sql"))
