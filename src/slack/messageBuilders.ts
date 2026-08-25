@@ -43,7 +43,7 @@ export function buildRequestMessageBlocks(request: RateRequest): KnownBlock[] {
     },
     {
       type: "section",
-      text: { type: "mrkdwn", text: `*Request Options*\n${requestOptionsSummary(request)}` }
+      text: { type: "mrkdwn", text: `*Tier Details*\n${requestOptionsSummary(request)}` }
     },
     {
       type: "section",
@@ -110,13 +110,13 @@ function leadContactSummary(request: RateRequest) {
 
 function requestOptionsSummary(request: RateRequest) {
   if (request.requestType === "B3PL") {
-    return `B3PL Tier: ${escapeMrkdwn(b3plTierSummary(request.b3plTier) || "Not selected")}`;
+    return `Tier: ${escapeMrkdwn(b3plTierSummary(request.b3plTier) || "Not selected")}`;
   }
 
   return [
-    `Carriers: ${request.carriers.length > 0 ? request.carriers.map(escapeMrkdwn).join(", ") : "Not selected"}`,
+    `Soapbox Option: ${escapeMrkdwn(request.soapboxOption ?? "Not selected")}`,
     `Service Model: ${escapeMrkdwn(request.serviceModel ?? "Not selected")}`,
-    `Soapbox Tier: ${escapeMrkdwn(sbTierSummary(request.sbTier) || "Not selected")}`
+    `Tier: ${escapeMrkdwn(sbTierSummary(request.sbTier) || "Not selected")}`
   ].join("\n");
 }
 

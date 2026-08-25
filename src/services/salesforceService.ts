@@ -337,13 +337,13 @@ function salesforceDescription(request: RateRequest) {
 
 function salesforceRequestOptionLines(request: RateRequest) {
   if (request.requestType === "B3PL") {
-    return [`B3PL Tier: ${b3plTierSummary(request.b3plTier) || "Not selected"}`];
+    return [`Tier: ${b3plTierSummary(request.b3plTier) || "Not selected"}`];
   }
 
   return [
-    `Carriers: ${request.carriers.length > 0 ? request.carriers.join(", ") : "Not selected"}`,
+    `Soapbox Option: ${request.soapboxOption ?? "Not selected"}`,
     `Service Model: ${request.serviceModel ?? "Not selected"}`,
-    `Soapbox Tier: ${sbTierSummary(request.sbTier) || "Not selected"}`
+    `Tier: ${sbTierSummary(request.sbTier) || "Not selected"}`
   ];
 }
 

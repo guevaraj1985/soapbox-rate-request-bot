@@ -1,6 +1,6 @@
-﻿import type Database from "better-sqlite3";
+import type Database from "better-sqlite3";
 import type { Carrier, RateRequest, RequestCreateInput, RequestStatus, RequestType, SlackFile } from "../types.js";
-import { isB3plTier, isCarrier, isRequestType, isServiceModel, normalizeSbTier } from "../slack/formOptions.js";
+import { isB3plTier, isCarrier, isRequestType, isServiceModel, isSoapboxOption, normalizeSbTier } from "../slack/formOptions.js";
 
 type RequestRow = {
   id: number;
@@ -10,6 +10,7 @@ type RequestRow = {
   requester_email: string;
   request_type: string | null;
   carriers_json: string | null;
+  soapbox_option: string | null;
   service_model: string | null;
   sb_tier: string | null;
   b3pl_tier: string | null;
@@ -55,10 +56,10 @@ export class RateRequestRepository {
         .prepare(
           `INSERT INTO rate_requests (
             request_number, requester_slack_id, requester_name, requester_email,
-            request_type, carriers_json, service_model, sb_tier, b3pl_tier,
+            request_type, carriers_json, soapbox_option, service_model, sb_tier, b3pl_tier,
             brand_name, lead_first_name, lead_last_name, lead_email, lead_phone, lead_website,
             description, priority, status, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Open', ?, ?)`
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Open', ?, ?)`
         )
         .run(
           requestNumber,
@@ -67,6 +68,7 @@ export class RateRequestRepository {
           input.requesterEmail,
           input.requestType,
           JSON.stringify(input.carriers),
+          emptyToNull(input.soapboxOption),
           emptyToNull(input.serviceModel),
           emptyToNull(input.sbTier),
           emptyToNull(input.b3plTier),
@@ -229,6 +231,7 @@ export class RateRequestRepository {
       requesterEmail: row.requester_email,
       requestType,
       carriers: requestType === "Soapbox" ? parseCarriers(row.carriers_json) : [],
+      soapboxOption: row.soapbox_option && isSoapboxOption(row.soapbox_option) ? row.soapbox_option : null,
       serviceModel: row.service_model && isServiceModel(row.service_model) ? row.service_model : null,
       sbTier: normalizeSbTier(row.sb_tier) ?? null,
       b3plTier: row.b3pl_tier && isB3plTier(row.b3pl_tier) ? row.b3pl_tier : null,

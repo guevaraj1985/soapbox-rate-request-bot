@@ -1,9 +1,8 @@
-import type { B3plTier, Carrier, RequestType, SbTier, ServiceModel, SlackFile } from "../types.js";
+import type { B3plTier, RequestType, SbTier, ServiceModel, SlackFile, SoapboxOption } from "../types.js";
 import {
   ACTION_ASSIGN_USER,
   ACTION_B3PL_TIER,
   ACTION_BRAND,
-  ACTION_CARRIERS,
   ACTION_COMPLETION_FILES,
   ACTION_COMPLETION_SUMMARY,
   ACTION_DESCRIPTION,
@@ -16,10 +15,10 @@ import {
   ACTION_REQUEST_TYPE,
   ACTION_SB_TIER,
   ACTION_SERVICE_MODEL,
+  ACTION_SOAPBOX_OPTION,
   BLOCK_ASSIGN_USER,
   BLOCK_B3PL_TIER,
   BLOCK_BRAND,
-  BLOCK_CARRIERS,
   BLOCK_COMPLETION_FILES,
   BLOCK_COMPLETION_SUMMARY,
   BLOCK_DESCRIPTION,
@@ -31,9 +30,10 @@ import {
   BLOCK_NEEDS_INFO_NOTE,
   BLOCK_REQUEST_TYPE,
   BLOCK_SB_TIER,
-  BLOCK_SERVICE_MODEL
+  BLOCK_SERVICE_MODEL,
+  BLOCK_SOAPBOX_OPTION
 } from "./constants.js";
-import { carriers, isB3plTier, isCarrier, isRequestType, isServiceModel, normalizeSbTier } from "./formOptions.js";
+import { isB3plTier, isRequestType, isServiceModel, isSoapboxOption, normalizeSbTier } from "./formOptions.js";
 
 type ViewState = Record<string, Record<string, Record<string, unknown>>>;
 
@@ -44,7 +44,8 @@ export function getRateRequestValues(state: ViewState) {
 
   return {
     requestType,
-    carriers: requestType === "Soapbox" ? selectedCarriers(state, BLOCK_CARRIERS, ACTION_CARRIERS) : [],
+    carriers: [],
+    soapboxOption: requestType === "Soapbox" ? selectedSoapboxOption(state, BLOCK_SOAPBOX_OPTION, ACTION_SOAPBOX_OPTION) : undefined,
     serviceModel: requestType === "Soapbox" ? selectedServiceModel(state, BLOCK_SERVICE_MODEL, ACTION_SERVICE_MODEL) : undefined,
     sbTier: requestType === "Soapbox" ? selectedSbTier(state, BLOCK_SB_TIER, ACTION_SB_TIER) : undefined,
     b3plTier: requestType === "B3PL" ? selectedB3plTier(state, BLOCK_B3PL_TIER, ACTION_B3PL_TIER) : undefined,
@@ -84,11 +85,11 @@ export function validateRateRequestValues(values: ReturnType<typeof getRateReque
   const errors: Record<string, string> = {};
   if (!values.requestType) errors[BLOCK_REQUEST_TYPE] = "Request type is required.";
   if (values.requestType === "Soapbox") {
-    if (values.carriers.length < 1) errors[BLOCK_CARRIERS] = "Select at least one carrier.";
+    if (!values.soapboxOption) errors[BLOCK_SOAPBOX_OPTION] = "Soapbox option is required.";
     if (!values.serviceModel) errors[BLOCK_SERVICE_MODEL] = "Service model is required.";
-    if (!values.sbTier) errors[BLOCK_SB_TIER] = "Soapbox tier is required.";
+    if (!values.sbTier) errors[BLOCK_SB_TIER] = "Tier is required.";
   }
-  if (values.requestType === "B3PL" && !values.b3plTier) errors[BLOCK_B3PL_TIER] = "B3PL tier is required.";
+  if (values.requestType === "B3PL" && !values.b3plTier) errors[BLOCK_B3PL_TIER] = "Tier is required.";
   if (!values.brandName.trim()) errors[BLOCK_BRAND] = "Brand/company name is required.";
   if (values.brandName.length > 150) errors[BLOCK_BRAND] = "Brand/company name must be 150 characters or fewer.";
   if (!values.leadName.trim()) errors[BLOCK_LEAD_NAME] = "Lead contact name is required by Salesforce.";
@@ -127,6 +128,10 @@ function selectedRequestType(state: ViewState, blockId: string, actionId: string
   return value && isRequestType(value) ? value : "Soapbox";
 }
 
+function selectedSoapboxOption(state: ViewState, blockId: string, actionId: string): SoapboxOption | undefined {
+  const value = selectedStringValue(state, blockId, actionId);
+  return value && isSoapboxOption(value) ? value : undefined;
+}
 
 function selectedServiceModel(state: ViewState, blockId: string, actionId: string): ServiceModel | undefined {
   const value = selectedStringValue(state, blockId, actionId);
@@ -147,20 +152,6 @@ function selectedStringValue(state: ViewState, blockId: string, actionId: string
   const selected = state[blockId]?.[actionId]?.selected_option;
   if (isObject(selected) && typeof selected.value === "string") return selected.value;
   return undefined;
-}
-
-function selectedCarriers(state: ViewState, blockId: string, actionId: string): Carrier[] {
-  const selectedOptions = state[blockId]?.[actionId]?.selected_options;
-  if (!Array.isArray(selectedOptions)) return [];
-  const selectedValues = selectedOptions
-    .filter(isObject)
-    .map((option) => stringFrom(option.value))
-    .filter(Boolean);
-  const selectedCarrierValues = selectedValues.filter(isCarrier);
-  if (selectedValues.includes("select_all") && (selectedCarrierValues.length === 0 || selectedCarrierValues.length === carriers.length)) {
-    return [...carriers];
-  }
-  return selectedCarrierValues;
 }
 
 function fileValues(state: ViewState, blockId: string, actionId: string): SlackFile[] {
@@ -186,7 +177,3 @@ function isObject(value: unknown): value is Record<string, unknown> {
 function stringFrom(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
-
-
-
-

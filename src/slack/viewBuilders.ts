@@ -1,10 +1,9 @@
 import type { KnownBlock, ModalView, PlainTextOption } from "@slack/types";
-import type { B3plTier, Carrier, RateRequest, RequestType, SbTier, ServiceModel } from "../types.js";
+import type { B3plTier, RateRequest, RequestType, SbTier, ServiceModel, SoapboxOption } from "../types.js";
 import {
   ACTION_ASSIGN_USER,
   ACTION_B3PL_TIER,
   ACTION_BRAND,
-  ACTION_CARRIERS,
   ACTION_COMPLETION_FILES,
   ACTION_COMPLETION_SUMMARY,
   ACTION_DESCRIPTION,
@@ -18,11 +17,11 @@ import {
   ACTION_SB_TIER,
   ACTION_SEND_TEMPLATE,
   ACTION_SERVICE_MODEL,
+  ACTION_SOAPBOX_OPTION,
   ASSIGN_VIEW,
   BLOCK_ASSIGN_USER,
   BLOCK_B3PL_TIER,
   BLOCK_BRAND,
-  BLOCK_CARRIERS,
   BLOCK_COMPLETION_FILES,
   BLOCK_COMPLETION_SUMMARY,
   BLOCK_DESCRIPTION,
@@ -35,12 +34,13 @@ import {
   BLOCK_REQUEST_TYPE,
   BLOCK_SB_TIER,
   BLOCK_SERVICE_MODEL,
+  BLOCK_SOAPBOX_OPTION,
   CANCEL_VIEW,
   COMPLETE_VIEW,
   NEEDS_INFO_VIEW,
   RATE_REQUEST_VIEW
 } from "./constants.js";
-import { b3plTierDetails, b3plTiers, carriers, requestTypes, sbTierSummary, sbTiers, serviceModels } from "./formOptions.js";
+import { b3plTierDetails, b3plTiers, requestTypes, sbTierSummary, sbTiers, serviceModels, soapboxOptions } from "./formOptions.js";
 
 const acceptedFileTypes = ["csv", "xls", "xlsx", "pdf", "png", "jpg", "jpeg", "zip"];
 
@@ -50,8 +50,6 @@ export function buildRateRequestModal(input: {
   templateUrl?: string;
   templateFileEnabled?: boolean;
   selectedRequestType?: RequestType;
-  selectedCarrierValues?: string[];
-  carrierSelectAllActive?: boolean;
 }): ModalView {
   const selectedRequestType = input.selectedRequestType ?? "Soapbox";
   const templateAccessory = input.templateUrl
@@ -79,15 +77,14 @@ export function buildRateRequestModal(input: {
     ...(templateAccessory ? { accessory: templateAccessory } : {})
   };
 
-  const requestTypeBlocks: KnownBlock[] = selectedRequestType === "B3PL" ? b3plRequestBlocks() : soapboxRequestBlocks(input.selectedCarrierValues ?? []);
+  const requestTypeBlocks: KnownBlock[] = selectedRequestType === "B3PL" ? b3plRequestBlocks() : soapboxRequestBlocks();
 
   return {
     type: "modal",
     callback_id: RATE_REQUEST_VIEW,
     private_metadata: JSON.stringify({
       requesterName: input.requesterName,
-      requesterEmail: input.requesterEmail,
-      carrierSelectAllActive: Boolean(input.carrierSelectAllActive)
+      requesterEmail: input.requesterEmail
     }),
     title: { type: "plain_text", text: "Rate Request" },
     submit: { type: "plain_text", text: "Submit" },
@@ -203,17 +200,16 @@ export function buildRateRequestModal(input: {
   };
 }
 
-function soapboxRequestBlocks(selectedCarrierValues: string[]): KnownBlock[] {
+function soapboxRequestBlocks(): KnownBlock[] {
   return [
     {
       type: "input",
-      block_id: BLOCK_CARRIERS,
-      label: { type: "plain_text", text: "Carriers (Required)" },
+      block_id: BLOCK_SOAPBOX_OPTION,
+      label: { type: "plain_text", text: "Soapbox Option (Required)" },
       element: {
-        type: "checkboxes",
-        action_id: ACTION_CARRIERS,
-        options: carrierOptions(),
-        ...(selectedCarrierValues.length > 0 ? { initial_options: carrierOptions().filter((option) => Boolean(option.value && selectedCarrierValues.includes(option.value))) } : {})
+        type: "static_select",
+        action_id: ACTION_SOAPBOX_OPTION,
+        options: soapboxOptions.map(soapboxOption)
       }
     },
     {
@@ -229,7 +225,7 @@ function soapboxRequestBlocks(selectedCarrierValues: string[]): KnownBlock[] {
     {
       type: "input",
       block_id: BLOCK_SB_TIER,
-      label: { type: "plain_text", text: "Soapbox Tier (Required)" },
+      label: { type: "plain_text", text: "Tier (Required)" },
       element: {
         type: "static_select",
         action_id: ACTION_SB_TIER,
@@ -244,7 +240,7 @@ function b3plRequestBlocks(): KnownBlock[] {
     {
       type: "input",
       block_id: BLOCK_B3PL_TIER,
-      label: { type: "plain_text", text: "B3PL Tier (Required)" },
+      label: { type: "plain_text", text: "Tier (Required)" },
       element: {
         type: "static_select",
         action_id: ACTION_B3PL_TIER,
@@ -345,14 +341,11 @@ export function buildCancelConfirmationModal(request: RateRequest): ModalView {
 }
 
 
-function carrierOptions() {
-  return [...carriers.map(carrierOption), plainOption("Select all", "select_all")];
-}
 function requestTypeOption(value: RequestType) {
   return plainOption(value, value);
 }
 
-function carrierOption(value: Carrier) {
+function soapboxOption(value: SoapboxOption) {
   return plainOption(value, value);
 }
 

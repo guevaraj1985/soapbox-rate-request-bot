@@ -10,8 +10,9 @@ function request(overrides: Partial<RateRequest> = {}): RateRequest {
     requesterName: "Jane Employee",
     requesterEmail: "jane.employee@onsoapbox.com",
     requestType: "Soapbox",
-    carriers: ["FedEx", "UPS"],
-    serviceModel: "Soapbox Shipping Rates",
+    carriers: [],
+    soapboxOption: "Whitelist",
+    serviceModel: "WMS",
     sbTier: "Enterprise (T3)",
     brandName: "Test Brand",
     leadFirstName: "Pat",
@@ -53,9 +54,9 @@ describe("Salesforce payload", () => {
     expect(result.payload.Email).not.toBe("jane.employee@onsoapbox.com");
     expect(result.payload.Metadata__c).toBeUndefined();
     expect(result.payload.Description).toContain("Request Type: Soapbox");
-    expect(result.payload.Description).toContain("Carriers: FedEx, UPS");
-    expect(result.payload.Description).toContain("Service Model: Soapbox Shipping Rates");
-    expect(result.payload.Description).toContain("Soapbox Tier: Enterprise (T3)");
+    expect(result.payload.Description).toContain("Soapbox Option: Whitelist");
+    expect(result.payload.Description).toContain("Service Model: WMS");
+    expect(result.payload.Description).toContain("Tier: Enterprise (T3)");
     expect(result.payload.Description).toContain("Soapbox Requester: Jane Employee");
   });
 
@@ -63,6 +64,7 @@ describe("Salesforce payload", () => {
     const result = buildSalesforcePayload(request({
       requestType: "B3PL",
       carriers: [],
+      soapboxOption: null,
       serviceModel: null,
       sbTier: null,
       b3plTier: "Commercial"
@@ -70,7 +72,7 @@ describe("Salesforce payload", () => {
 
     expect(result.payload.LeadSource).toBe("B3PL Slack Rate Request Form");
     expect(result.payload.Description).toContain("Request Type: B3PL");
-    expect(result.payload.Description).toContain("B3PL Tier: Commercial (50% services / 30% shipping)");
+    expect(result.payload.Description).toContain("Tier: Commercial (50% services / 30% shipping)");
   });
 
   it("builds precise completion notes for Salesforce Notes, not metadata", () => {

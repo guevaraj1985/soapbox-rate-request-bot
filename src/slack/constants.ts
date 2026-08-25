@@ -15,8 +15,8 @@ export const ACTION_SEND_TEMPLATE = "rate_request_send_template";
 
 export const BLOCK_REQUEST_TYPE = "request_type";
 export const ACTION_REQUEST_TYPE = "request_type_value";
-export const BLOCK_CARRIERS = "carriers";
-export const ACTION_CARRIERS = "carriers_value";
+export const BLOCK_SOAPBOX_OPTION = "soapbox_option";
+export const ACTION_SOAPBOX_OPTION = "soapbox_option_value";
 export const BLOCK_SERVICE_MODEL = "service_model";
 export const ACTION_SERVICE_MODEL = "service_model_value";
 export const BLOCK_SB_TIER = "sb_tier";

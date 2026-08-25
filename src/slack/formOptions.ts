@@ -1,16 +1,18 @@
-import type { B3plTier, Carrier, RequestType, SbTier, ServiceModel } from "../types.js";
+import type { B3plTier, Carrier, RequestType, SbTier, ServiceModel, SoapboxOption } from "../types.js";
 
 export const requestTypes: RequestType[] = ["Soapbox", "B3PL"];
 export const carriers: Carrier[] = ["FedEx", "UPS", "USPS"];
-export const serviceModels: ServiceModel[] = ["Soapbox Shipping Rates", "WMS OR API", "Basic3PL"];
+export const soapboxOptions: SoapboxOption[] = ["National", "Open", "Whitelist"];
+export const serviceModels: ServiceModel[] = ["WMS", "API", "Basic3PL"];
 
-export const sbTierDetails: Record<SbTier, { ups?: string; fedex?: string; usps?: string }> = {
+export const sbTierDetails: Record<SbTier, { ups?: string; fedex?: string; usps?: string; note?: string }> = {
   "3PL Partner (T0)": { fedex: "5%", ups: "5%", usps: "0%" },
   "Marketplace (T1)": { fedex: "10%", ups: "10%", usps: "1%" },
   "Reseller (T2)": { fedex: "15%", ups: "15%", usps: "2%" },
   "Enterprise (T3)": { fedex: "20%", ups: "20%", usps: "3%" },
   "MM (T4)": { fedex: "25%", ups: "25%", usps: "4%" },
-  "SMB (T5)": { fedex: "30%", ups: "30%", usps: "5%" }
+  "SMB (T5)": { fedex: "30%", ups: "30%", usps: "5%" },
+  Promo: { note: "Basic3PL promo rates only" }
 };
 
 export const sbTiers = Object.keys(sbTierDetails) as SbTier[];
@@ -29,7 +31,8 @@ export const b3plTierDetails: Record<B3plTier, { servicesUplift: string; shippin
   "SB Direct": { servicesUplift: "65%", shippingUplift: "30%" },
   Commercial: { servicesUplift: "50%", shippingUplift: "30%" },
   Enterprise: { servicesUplift: "40%", shippingUplift: "20%" },
-  Wholesale: { servicesUplift: "30%", shippingUplift: "20%" }
+  Wholesale: { servicesUplift: "30%", shippingUplift: "20%" },
+  Promo: { servicesUplift: "Separate Basic3PL uplifts", shippingUplift: "Separate Basic3PL uplifts" }
 };
 
 export const b3plTiers = Object.keys(b3plTierDetails) as B3plTier[];
@@ -37,6 +40,7 @@ export const b3plTiers = Object.keys(b3plTierDetails) as B3plTier[];
 export function sbTierSummary(tier?: SbTier | null) {
   if (!tier) return "";
   const details = sbTierDetails[tier];
+  if (details.note) return `${tier} - ${details.note}`;
   const carrierDetails = [
     details.fedex ? `FedEx ${details.fedex}` : undefined,
     details.ups ? `UPS ${details.ups}` : undefined,
@@ -65,6 +69,10 @@ export function isCarrier(value: string): value is Carrier {
   return carriers.includes(value as Carrier);
 }
 
+export function isSoapboxOption(value: string): value is SoapboxOption {
+  return soapboxOptions.includes(value as SoapboxOption);
+}
+
 export function isServiceModel(value: string): value is ServiceModel {
   return serviceModels.includes(value as ServiceModel);
 }
@@ -76,4 +84,3 @@ export function isSbTier(value: string): value is SbTier {
 export function isB3plTier(value: string): value is B3plTier {
   return b3plTiers.includes(value as B3plTier);
 }
-

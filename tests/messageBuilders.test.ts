@@ -10,8 +10,9 @@ function request(overrides: Partial<RateRequest> = {}): RateRequest {
     requesterName: "Jane Requester",
     requesterEmail: "jane@example.com",
     requestType: "Soapbox",
-    carriers: ["FedEx", "UPS"],
-    serviceModel: "Soapbox Shipping Rates",
+    carriers: [],
+    soapboxOption: "Whitelist",
+    serviceModel: "WMS",
     sbTier: "Reseller (T2)",
     brandName: "Test Brand",
     leadLastName: "Prospect",
@@ -40,10 +41,11 @@ describe("Slack request message buttons", () => {
     expect(buttonLabels(request({ assignedSlackId: "U456", assignedName: "Casey Analyst" }))).toContain("Reassign");
   });
 
-  it("shows conditional request option summaries", () => {
-    expect(blockText(request())).toContain("Request Type");
-    expect(blockText(request())).toContain("Carriers: FedEx, UPS");
-    expect(blockText(request({ requestType: "B3PL", carriers: [], serviceModel: null, sbTier: null, b3plTier: "Enterprise" }))).toContain("B3PL Tier: Enterprise");
+  it("shows tier detail summaries", () => {
+    expect(blockText(request())).toContain("Tier Details");
+    expect(blockText(request())).toContain("Soapbox Option: Whitelist");
+    expect(blockText(request())).toContain("Tier: Reseller");
+    expect(blockText(request({ requestType: "B3PL", carriers: [], soapboxOption: null, serviceModel: null, sbTier: null, b3plTier: "Enterprise" }))).toContain("Tier: Enterprise");
   });
 
   it("shows Mark Complete while a request is still open", () => {
@@ -56,4 +58,3 @@ describe("Slack request message buttons", () => {
     expect(buttonLabels(request({ status: "Complete" }))).toEqual(["Reopen Request"]);
   });
 });
-

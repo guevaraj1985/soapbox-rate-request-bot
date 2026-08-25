@@ -7,8 +7,8 @@ import { RateRequestRepository } from "../src/db/rateRequestRepository.js";
 function createRepo() {
   const db = new Database(":memory:");
   db.pragma("foreign_keys = ON");
-  const migration = fs.readFileSync(path.resolve("migrations/001_init.sql"), "utf8");
-  db.exec(migration);
+  db.exec(fs.readFileSync(path.resolve("migrations", "001_init.sql"), "utf8"));
+  db.exec(fs.readFileSync(path.resolve("migrations", "005_soapbox_option.sql"), "utf8"));
   return new RateRequestRepository(db);
 }
 
@@ -20,12 +20,13 @@ describe("RateRequestRepository", () => {
       requesterName: "Jane Requester",
       requesterEmail: "jane@example.com",
       requestType: "Soapbox",
-      carriers: ["FedEx", "UPS"],
-      serviceModel: "Soapbox Shipping Rates",
+      carriers: [],
+      soapboxOption: "National",
+      serviceModel: "WMS",
       sbTier: "Marketplace (T1)",
       brandName: "Soapbox",
       leadLastName: "Prospect",
-      description: "Compare carrier rates for matched service levels.",
+      description: "Compare rates for matched service levels.",
       priority: "Normal",
       files: [{ id: "F1", name: "shipments.csv", filetype: "csv", permalink: "https://slack/files/F1" }]
     });
@@ -44,6 +45,7 @@ describe("RateRequestRepository", () => {
     });
 
     expect(first.requestNumber).toMatch(/^RR-\d{8}-0001$/);
+    expect(first.soapboxOption).toBe("National");
     expect(second.requestNumber).toMatch(/^RR-\d{8}-0002$/);
     expect(first.requestNumber).not.toEqual(second.requestNumber);
     expect(second.requestType).toBe("B3PL");
@@ -57,9 +59,10 @@ describe("RateRequestRepository", () => {
       requesterName: "Jane Requester",
       requesterEmail: "jane@example.com",
       requestType: "Soapbox",
-      carriers: ["FedEx", "UPS", "USPS"],
-      serviceModel: "WMS OR API",
-      sbTier: "MM (T4)",
+      carriers: [],
+      soapboxOption: "Open",
+      serviceModel: "API",
+      sbTier: "Promo",
       brandName: "Soapbox",
       leadFirstName: "Pat",
       leadLastName: "Prospect",
@@ -72,9 +75,10 @@ describe("RateRequestRepository", () => {
     });
 
     expect(request.requestType).toBe("Soapbox");
-    expect(request.carriers).toEqual(["FedEx", "UPS", "USPS"]);
-    expect(request.serviceModel).toBe("WMS OR API");
-    expect(request.sbTier).toBe("MM (T4)");
+    expect(request.carriers).toEqual([]);
+    expect(request.soapboxOption).toBe("Open");
+    expect(request.serviceModel).toBe("API");
+    expect(request.sbTier).toBe("Promo");
     expect(request.leadFirstName).toBe("Pat");
     expect(request.leadLastName).toBe("Prospect");
     expect(request.leadEmail).toBe("pat.prospect@example.com");
@@ -89,4 +93,3 @@ describe("RateRequestRepository", () => {
     expect(progressed.status).toBe("In Progress");
   });
 });
-

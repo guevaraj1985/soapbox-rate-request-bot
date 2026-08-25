@@ -2,9 +2,10 @@ export type RequestStatus = "Open" | "In Progress" | "Needs Information" | "Comp
 export type RequestPriority = "Normal" | "High" | "Urgent";
 export type RequestType = "Soapbox" | "B3PL";
 export type Carrier = "FedEx" | "UPS" | "USPS";
-export type ServiceModel = "Soapbox Shipping Rates" | "WMS OR API" | "Basic3PL";
-export type SbTier = "3PL Partner (T0)" | "Marketplace (T1)" | "Reseller (T2)" | "Enterprise (T3)" | "MM (T4)" | "SMB (T5)";
-export type B3plTier = "Self Service" | "SB Direct" | "Commercial" | "Enterprise" | "Wholesale";
+export type SoapboxOption = "National" | "Open" | "Whitelist";
+export type ServiceModel = "WMS" | "API" | "Basic3PL";
+export type SbTier = "3PL Partner (T0)" | "Marketplace (T1)" | "Reseller (T2)" | "Enterprise (T3)" | "MM (T4)" | "SMB (T5)" | "Promo";
+export type B3plTier = "Self Service" | "SB Direct" | "Commercial" | "Enterprise" | "Wholesale" | "Promo";
 
 export type SlackFile = {
   id: string;
@@ -22,6 +23,7 @@ export type RateRequest = {
   requesterEmail: string;
   requestType: RequestType;
   carriers: Carrier[];
+  soapboxOption?: SoapboxOption | null;
   serviceModel?: ServiceModel | null;
   sbTier?: SbTier | null;
   b3plTier?: B3plTier | null;
@@ -52,6 +54,7 @@ export type RequestCreateInput = {
   requesterEmail: string;
   requestType: RequestType;
   carriers: Carrier[];
+  soapboxOption?: SoapboxOption;
   serviceModel?: ServiceModel;
   sbTier?: SbTier;
   b3plTier?: B3plTier;
@@ -65,4 +68,3 @@ export type RequestCreateInput = {
   priority: RequestPriority;
   files: SlackFile[];
 };
-

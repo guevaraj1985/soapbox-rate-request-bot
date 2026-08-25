@@ -1,4 +1,4 @@
-﻿import type { App } from "@slack/bolt";
+import type { App } from "@slack/bolt";
 import type { WebClient } from "@slack/web-api";
 import type { RateRequestRepository } from "../db/rateRequestRepository.js";
 import { config } from "../config.js";
@@ -6,7 +6,6 @@ import { logger } from "../utils/logger.js";
 import {
   ACTION_ASSIGN,
   ACTION_CANCEL,
-  ACTION_CARRIERS,
   ACTION_COMPLETE,
   ACTION_IN_PROGRESS,
   ACTION_NEEDS_INFO,
@@ -25,7 +24,6 @@ import { getAssignValues, getCompletionValues, getNeedsInfoValues, getRateReques
 import { getSlackUserProfile } from "../services/slackUserService.js";
 import { RequestWorkflow } from "../services/requestWorkflow.js";
 import { sendTemplateFileToRequester } from "../services/templateFileService.js";
-import { carriers } from "../slack/formOptions.js";
 
 export function registerRateRequestHandlers(app: App, repo: RateRequestRepository) {
   app.command(RATE_REQUEST_COMMAND, async ({ ack, body, client, respond }) => {
@@ -69,44 +67,6 @@ export function registerRateRequestHandlers(app: App, repo: RateRequestRepositor
       })
     });
   });
-
-
-  app.action(ACTION_CARRIERS, async ({ ack, body, client }) => {
-    await ack();
-    if (!isCarrierActionBody(body)) return;
-    const selectedValues = body.actions[0]?.selected_options?.map((option) => option.value).filter(Boolean) ?? [];
-    const selectedCarrierValues = selectedValues.filter((value) => carriers.includes(value as (typeof carriers)[number]));
-    const selectAllSelected = selectedValues.includes("select_all");
-    const metadata = parseRateRequestModalMetadata(body.view.private_metadata);
-
-    let nextCarrierValues: string[] | undefined;
-    let nextSelectAllActive = false;
-
-    if (selectAllSelected && !metadata.carrierSelectAllActive) {
-      nextCarrierValues = [...carriers, "select_all"];
-      nextSelectAllActive = true;
-    } else if (!selectAllSelected && metadata.carrierSelectAllActive) {
-      nextCarrierValues = [];
-    } else if (selectAllSelected && metadata.carrierSelectAllActive && selectedCarrierValues.length < carriers.length) {
-      nextCarrierValues = selectedCarrierValues;
-    } else {
-      return;
-    }
-
-    await client.views.update({
-      view_id: body.view.id,
-      hash: body.view.hash,
-      view: buildRateRequestModal({
-        requesterName: metadata.requesterName,
-        requesterEmail: metadata.requesterEmail,
-        templateUrl: config.RATE_REQUEST_TEMPLATE_URL,
-        templateFileEnabled: Boolean(config.RATE_REQUEST_TEMPLATE_FILE_PATH),
-        selectedRequestType: "Soapbox",
-        selectedCarrierValues: nextCarrierValues,
-        carrierSelectAllActive: nextSelectAllActive
-      })
-    });
-  });
   app.action(ACTION_SEND_TEMPLATE, async ({ ack, body, client }) => {
     await ack();
     if (!config.RATE_REQUEST_TEMPLATE_FILE_PATH || !isActionBody(body)) return;
@@ -136,6 +96,7 @@ export function registerRateRequestHandlers(app: App, repo: RateRequestRepositor
         requesterEmail: requester.email,
         requestType: values.requestType,
         carriers: values.carriers,
+        soapboxOption: values.soapboxOption,
         serviceModel: values.serviceModel,
         sbTier: values.sbTier,
         b3plTier: values.b3plTier,
@@ -318,22 +279,12 @@ function isRequestTypeActionBody(body: unknown): body is {
 function parseRateRequestModalMetadata(value?: string) {
   if (!value) return { requesterName: "Requester", requesterEmail: "Slack profile email will be used on submit" };
   try {
-    const parsed = JSON.parse(value) as { requesterName?: unknown; requesterEmail?: unknown; carrierSelectAllActive?: unknown };
+    const parsed = JSON.parse(value) as { requesterName?: unknown; requesterEmail?: unknown };
     return {
       requesterName: typeof parsed.requesterName === "string" ? parsed.requesterName : "Requester",
-      requesterEmail: typeof parsed.requesterEmail === "string" ? parsed.requesterEmail : "Slack profile email will be used on submit",
-      carrierSelectAllActive: parsed.carrierSelectAllActive === true
+      requesterEmail: typeof parsed.requesterEmail === "string" ? parsed.requesterEmail : "Slack profile email will be used on submit"
     };
   } catch {
     return { requesterName: "Requester", requesterEmail: "Slack profile email will be used on submit" };
   }
 }
-
-function isCarrierActionBody(body: unknown): body is {
-  view: { id: string; hash?: string; private_metadata?: string };
-  actions: Array<{ selected_options?: Array<{ value: string }> }>;
-} {
-  return typeof body === "object" && body !== null && "view" in body && "actions" in body;
-}
-
-
