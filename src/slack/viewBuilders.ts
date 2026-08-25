@@ -50,6 +50,7 @@ export function buildRateRequestModal(input: {
   templateUrl?: string;
   templateFileEnabled?: boolean;
   selectedRequestType?: RequestType;
+  selectedServiceModel?: ServiceModel;
 }): ModalView {
   const selectedRequestType = input.selectedRequestType ?? "Soapbox";
   const templateAccessory = input.templateUrl
@@ -77,7 +78,7 @@ export function buildRateRequestModal(input: {
     ...(templateAccessory ? { accessory: templateAccessory } : {})
   };
 
-  const requestTypeBlocks: KnownBlock[] = selectedRequestType === "B3PL" ? b3plRequestBlocks() : soapboxRequestBlocks();
+  const requestTypeBlocks: KnownBlock[] = selectedRequestType === "B3PL" ? b3plRequestBlocks() : soapboxRequestBlocks(input.selectedServiceModel);
 
   return {
     type: "modal",
@@ -200,7 +201,7 @@ export function buildRateRequestModal(input: {
   };
 }
 
-function soapboxRequestBlocks(): KnownBlock[] {
+function soapboxRequestBlocks(selectedServiceModel?: ServiceModel): KnownBlock[] {
   return [
     {
       type: "input",
@@ -215,39 +216,47 @@ function soapboxRequestBlocks(): KnownBlock[] {
     {
       type: "input",
       block_id: BLOCK_SERVICE_MODEL,
+      dispatch_action: true,
       label: { type: "plain_text", text: "Service Model (Required)" },
       element: {
         type: "static_select",
         action_id: ACTION_SERVICE_MODEL,
-        options: serviceModels.map(serviceModelOption)
+        options: serviceModels.map(serviceModelOption),
+        ...(selectedServiceModel ? { initial_option: serviceModelOption(selectedServiceModel) } : {})
       }
     },
-    {
-      type: "input",
-      block_id: BLOCK_SB_TIER,
-      label: { type: "plain_text", text: "Tier (Required)" },
-      element: {
-        type: "static_select",
-        action_id: ACTION_SB_TIER,
-        options: sbTiers.map(sbTierOption)
-      }
-    }
+    selectedServiceModel === "Basic3PL" ? b3plTierBlock() : sbTierBlock()
   ];
 }
 
 function b3plRequestBlocks(): KnownBlock[] {
-  return [
-    {
-      type: "input",
-      block_id: BLOCK_B3PL_TIER,
-      label: { type: "plain_text", text: "Tier (Required)" },
-      element: {
-        type: "static_select",
-        action_id: ACTION_B3PL_TIER,
-        options: b3plTiers.map(b3plTierOption)
-      }
+  return [b3plTierBlock()];
+}
+
+function sbTierBlock(): KnownBlock {
+  return {
+    type: "input",
+    block_id: BLOCK_SB_TIER,
+    label: { type: "plain_text", text: "Tier (Required)" },
+    element: {
+      type: "static_select",
+      action_id: ACTION_SB_TIER,
+      options: sbTiers.map(sbTierOption)
     }
-  ];
+  };
+}
+
+function b3plTierBlock(): KnownBlock {
+  return {
+    type: "input",
+    block_id: BLOCK_B3PL_TIER,
+    label: { type: "plain_text", text: "Tier (Required)" },
+    element: {
+      type: "static_select",
+      action_id: ACTION_B3PL_TIER,
+      options: b3plTiers.map(b3plTierOption)
+    }
+  };
 }
 
 export function buildAssignModal(request: RateRequest): ModalView {

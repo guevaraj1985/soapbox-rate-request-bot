@@ -162,10 +162,9 @@ export function buildSalesforceCompletionNoteBody(input: {
 }
 
 function selectedTierSummary(request: RateRequest) {
-  if (request.requestType === "B3PL") return b3plTierSummary(request.b3plTier) || "Not selected";
+  if (request.requestType === "B3PL" || request.serviceModel === "Basic3PL") return b3plTierSummary(request.b3plTier) || "Not selected";
   return sbTierSummary(request.sbTier) || "Not selected";
 }
-
 async function getAccessToken(): Promise<TokenResponse> {
   const params = new URLSearchParams({
     grant_type: "client_credentials",
@@ -340,10 +339,14 @@ function salesforceRequestOptionLines(request: RateRequest) {
     return [`Tier: ${b3plTierSummary(request.b3plTier) || "Not selected"}`];
   }
 
+  const tierSummary = request.serviceModel === "Basic3PL"
+    ? b3plTierSummary(request.b3plTier)
+    : sbTierSummary(request.sbTier);
+
   return [
     `Soapbox Option: ${request.soapboxOption ?? "Not selected"}`,
     `Service Model: ${request.serviceModel ?? "Not selected"}`,
-    `Tier: ${sbTierSummary(request.sbTier) || "Not selected"}`
+    `Tier: ${tierSummary || "Not selected"}`
   ];
 }
 

@@ -46,6 +46,7 @@ describe("Slack request message buttons", () => {
     expect(blockText(request())).toContain("Soapbox Option: Whitelist");
     expect(blockText(request())).toContain("Tier: Reseller");
     expect(blockText(request({ requestType: "B3PL", carriers: [], soapboxOption: null, serviceModel: null, sbTier: null, b3plTier: "Enterprise" }))).toContain("Tier: Enterprise");
+    expect(blockText(request({ serviceModel: "Basic3PL", sbTier: null, b3plTier: "Promo" }))).toContain("Tier: Promo");
   });
 
   it("shows Mark Complete while a request is still open", () => {

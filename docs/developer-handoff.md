@@ -159,7 +159,7 @@ Current business mapping:
 - The Soapbox employee who submits the request is stored in `Description` only.
 - `LeadSource` is `Slack Rate Request Form` for Soapbox requests and `B3PL Slack Rate Request Form` for B3PL requests.
 - `Nature_of_Interest__c` is the Slack rate request ID, for example `RR-20260805-0001`.
-- Soapbox requests include Soapbox Option, service model, and tier in `Description`.
+- Soapbox requests include Soapbox Option, service model, and tier in `Description`. Soapbox requests with Service Model `Basic3PL` use the Basic3PL uplift tier list and store that selection in `b3pl_tier`.
 - B3PL requests include the selected B3PL tier and uplift details in `Description`.
 - `Metadata__c` is intentionally not sent.
 
@@ -218,5 +218,5 @@ Before production cutover:
 - `soapbox_option`: Soapbox option. Current values are `National`, `Open`, and `Whitelist`.
 - `service_model`: Soapbox service model. Current values are `WMS`, `API`, and `Basic3PL`.
 - `sb_tier`: Tier for Soapbox requests. Current dropdown values are `3PL Partner (T0) - FedEx 5% / UPS 5% / USPS 0%`, `Marketplace (T1) - FedEx 10% / UPS 10% / USPS 1%`, `Reseller (T2) - FedEx 15% / UPS 15% / USPS 2%`, `Enterprise (T3) - FedEx 20% / UPS 20% / USPS 3%`, `MM (T4) - FedEx 25% / UPS 25% / USPS 4%`, `SMB (T5) - FedEx 30% / UPS 30% / USPS 5%`, and `Promo - Basic3PL promo rates only`. T0-T2 selections post an approval notice tagging <@U0693PQ6H89>, <@UK2F5L0HH>, and <@U068N11K7SM>.
-- `b3pl_tier`: B3PL tier/uplift option. Current values are `Self Service`, `SB Direct`, `Commercial`, `Enterprise`, `Wholesale`, and `Promo - Separate Basic3PL uplifts`.
+- `b3pl_tier`: B3PL tier/uplift option. Also used by Soapbox requests when Service Model is `Basic3PL`. Current values are `Self Service`, `SB Direct`, `Commercial`, `Enterprise`, `Wholesale`, and `Promo - Separate Basic3PL uplifts`.
 

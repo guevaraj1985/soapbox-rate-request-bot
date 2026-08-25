@@ -41,14 +41,16 @@ export function getRateRequestValues(state: ViewState) {
   const leadName = textValue(state, BLOCK_LEAD_NAME, ACTION_LEAD_NAME);
   const parsedLeadName = parseLeadName(leadName);
   const requestType = selectedRequestType(state, BLOCK_REQUEST_TYPE, ACTION_REQUEST_TYPE);
+  const serviceModel = requestType === "Soapbox" ? selectedServiceModel(state, BLOCK_SERVICE_MODEL, ACTION_SERVICE_MODEL) : undefined;
+  const usesBasic3plTier = requestType === "B3PL" || serviceModel === "Basic3PL";
 
   return {
     requestType,
     carriers: [],
     soapboxOption: requestType === "Soapbox" ? selectedSoapboxOption(state, BLOCK_SOAPBOX_OPTION, ACTION_SOAPBOX_OPTION) : undefined,
-    serviceModel: requestType === "Soapbox" ? selectedServiceModel(state, BLOCK_SERVICE_MODEL, ACTION_SERVICE_MODEL) : undefined,
-    sbTier: requestType === "Soapbox" ? selectedSbTier(state, BLOCK_SB_TIER, ACTION_SB_TIER) : undefined,
-    b3plTier: requestType === "B3PL" ? selectedB3plTier(state, BLOCK_B3PL_TIER, ACTION_B3PL_TIER) : undefined,
+    serviceModel,
+    sbTier: requestType === "Soapbox" && !usesBasic3plTier ? selectedSbTier(state, BLOCK_SB_TIER, ACTION_SB_TIER) : undefined,
+    b3plTier: usesBasic3plTier ? selectedB3plTier(state, BLOCK_B3PL_TIER, ACTION_B3PL_TIER) : undefined,
     brandName: textValue(state, BLOCK_BRAND, ACTION_BRAND),
     leadName,
     leadFirstName: parsedLeadName.firstName,
@@ -87,7 +89,11 @@ export function validateRateRequestValues(values: ReturnType<typeof getRateReque
   if (values.requestType === "Soapbox") {
     if (!values.soapboxOption) errors[BLOCK_SOAPBOX_OPTION] = "Soapbox option is required.";
     if (!values.serviceModel) errors[BLOCK_SERVICE_MODEL] = "Service model is required.";
-    if (!values.sbTier) errors[BLOCK_SB_TIER] = "Tier is required.";
+    if (values.serviceModel === "Basic3PL") {
+      if (!values.b3plTier) errors[BLOCK_B3PL_TIER] = "Tier is required.";
+    } else if (!values.sbTier) {
+      errors[BLOCK_SB_TIER] = "Tier is required.";
+    }
   }
   if (values.requestType === "B3PL" && !values.b3plTier) errors[BLOCK_B3PL_TIER] = "Tier is required.";
   if (!values.brandName.trim()) errors[BLOCK_BRAND] = "Brand/company name is required.";

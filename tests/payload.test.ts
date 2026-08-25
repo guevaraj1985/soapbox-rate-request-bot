@@ -46,12 +46,12 @@ describe("Slack modal payload parsing", () => {
     expect(validateRateRequestValues(values)).toEqual({});
   });
 
-  it("extracts Promo as a Soapbox tier without carrier selection", () => {
+  it("extracts Promo as a Basic3PL uplift tier for Soapbox Basic3PL service requests", () => {
     const values = getRateRequestValues({
       request_type: { request_type_value: { selected_option: { value: "Soapbox" } } },
       soapbox_option: { soapbox_option_value: { selected_option: { value: "National" } } },
       service_model: { service_model_value: { selected_option: { value: "Basic3PL" } } },
-      sb_tier: { sb_tier_value: { selected_option: { value: "Promo" } } },
+      b3pl_tier: { b3pl_tier_value: { selected_option: { value: "Promo" } } },
       brand: { brand_value: { value: "Soapbox" } },
       lead_name: { lead_name_value: { value: "Unknown" } },
       lead_email: { lead_email_value: { value: "unknown@example.com" } },
@@ -62,7 +62,8 @@ describe("Slack modal payload parsing", () => {
     expect(values.carriers).toEqual([]);
     expect(values.soapboxOption).toBe("National");
     expect(values.serviceModel).toBe("Basic3PL");
-    expect(values.sbTier).toBe("Promo");
+    expect(values.sbTier).toBeUndefined();
+    expect(values.b3plTier).toBe("Promo");
     expect(validateRateRequestValues(values)).toEqual({});
   });
 

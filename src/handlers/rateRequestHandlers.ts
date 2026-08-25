@@ -12,6 +12,7 @@ import {
   ACTION_REOPEN,
   ACTION_REQUEST_TYPE,
   ACTION_SEND_TEMPLATE,
+  ACTION_SERVICE_MODEL,
   ASSIGN_VIEW,
   CANCEL_VIEW,
   COMPLETE_VIEW,
@@ -24,6 +25,7 @@ import { getAssignValues, getCompletionValues, getNeedsInfoValues, getRateReques
 import { getSlackUserProfile } from "../services/slackUserService.js";
 import { RequestWorkflow } from "../services/requestWorkflow.js";
 import { sendTemplateFileToRequester } from "../services/templateFileService.js";
+import { isServiceModel } from "../slack/formOptions.js";
 
 export function registerRateRequestHandlers(app: App, repo: RateRequestRepository) {
   app.command(RATE_REQUEST_COMMAND, async ({ ack, body, client, respond }) => {
@@ -55,15 +57,36 @@ export function registerRateRequestHandlers(app: App, repo: RateRequestRepositor
     await ack();
     if (!isRequestTypeActionBody(body)) return;
     const selectedRequestType = body.actions[0]?.selected_option?.value === "B3PL" ? "B3PL" : "Soapbox";
+    const metadata = parseRateRequestModalMetadata(body.view.private_metadata);
     await client.views.update({
       view_id: body.view.id,
       hash: body.view.hash,
       view: buildRateRequestModal({
-        requesterName: body.user.name ?? "Requester",
-        requesterEmail: "Slack profile email will be used on submit",
+        requesterName: metadata.requesterName,
+        requesterEmail: metadata.requesterEmail,
         templateUrl: config.RATE_REQUEST_TEMPLATE_URL,
         templateFileEnabled: Boolean(config.RATE_REQUEST_TEMPLATE_FILE_PATH),
         selectedRequestType
+      })
+    });
+  });
+
+  app.action(ACTION_SERVICE_MODEL, async ({ ack, body, client }) => {
+    await ack();
+    if (!isRequestTypeActionBody(body)) return;
+    const selectedServiceModelValue = body.actions[0]?.selected_option?.value;
+    const selectedServiceModel = selectedServiceModelValue && isServiceModel(selectedServiceModelValue) ? selectedServiceModelValue : undefined;
+    const metadata = parseRateRequestModalMetadata(body.view.private_metadata);
+    await client.views.update({
+      view_id: body.view.id,
+      hash: body.view.hash,
+      view: buildRateRequestModal({
+        requesterName: metadata.requesterName,
+        requesterEmail: metadata.requesterEmail,
+        templateUrl: config.RATE_REQUEST_TEMPLATE_URL,
+        templateFileEnabled: Boolean(config.RATE_REQUEST_TEMPLATE_FILE_PATH),
+        selectedRequestType: "Soapbox",
+        selectedServiceModel
       })
     });
   });

@@ -60,6 +60,18 @@ describe("Salesforce payload", () => {
     expect(result.payload.Description).toContain("Soapbox Requester: Jane Employee");
   });
 
+  it("uses B3PL uplift tier details for Soapbox Basic3PL service requests", () => {
+    const result = buildSalesforcePayload(request({
+      serviceModel: "Basic3PL",
+      sbTier: null,
+      b3plTier: "Promo"
+    }));
+
+    expect(result.payload.LeadSource).toBe("Slack Rate Request Form");
+    expect(result.payload.Description).toContain("Request Type: Soapbox");
+    expect(result.payload.Description).toContain("Service Model: Basic3PL");
+    expect(result.payload.Description).toContain("Tier: Promo (Separate Basic3PL uplifts services / Separate Basic3PL uplifts shipping)");
+  });
   it("uses the B3PL lead source and B3PL tier details", () => {
     const result = buildSalesforcePayload(request({
       requestType: "B3PL",

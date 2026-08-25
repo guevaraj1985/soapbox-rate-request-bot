@@ -113,10 +113,14 @@ function requestOptionsSummary(request: RateRequest) {
     return `Tier: ${escapeMrkdwn(b3plTierSummary(request.b3plTier) || "Not selected")}`;
   }
 
+  const tierSummary = request.serviceModel === "Basic3PL"
+    ? b3plTierSummary(request.b3plTier)
+    : sbTierSummary(request.sbTier);
+
   return [
     `Soapbox Option: ${escapeMrkdwn(request.soapboxOption ?? "Not selected")}`,
     `Service Model: ${escapeMrkdwn(request.serviceModel ?? "Not selected")}`,
-    `Tier: ${escapeMrkdwn(sbTierSummary(request.sbTier) || "Not selected")}`
+    `Tier: ${escapeMrkdwn(tierSummary || "Not selected")}`
   ].join("\n");
 }
 
