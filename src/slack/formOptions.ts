@@ -32,7 +32,7 @@ export const b3plTierDetails: Record<B3plTier, { servicesUplift: string; shippin
   Commercial: { servicesUplift: "50%", shippingUplift: "30%" },
   Enterprise: { servicesUplift: "40%", shippingUplift: "20%" },
   Wholesale: { servicesUplift: "30%", shippingUplift: "20%" },
-  Promo: { servicesUplift: "Separate Basic3PL uplifts", shippingUplift: "Separate Basic3PL uplifts" }
+  Promo: { servicesUplift: "Promo", shippingUplift: "Promo" }
 };
 
 export const b3plTiers = Object.keys(b3plTierDetails) as B3plTier[];
@@ -51,6 +51,7 @@ export function sbTierSummary(tier?: SbTier | null) {
 
 export function b3plTierSummary(tier?: B3plTier | null) {
   if (!tier) return "";
+  if (tier === "Promo") return tier;
   const details = b3plTierDetails[tier];
   return `${tier} (${details.servicesUplift} services / ${details.shippingUplift} shipping)`;
 }

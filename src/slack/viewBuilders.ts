@@ -368,7 +368,8 @@ function sbTierOption(value: SbTier) {
 
 function b3plTierOption(value: B3plTier) {
   const details = b3plTierDetails[value];
-  return plainOption(`${value} - ${details.servicesUplift} services / ${details.shippingUplift} shipping`, value);
+  const label = value === "Promo" ? value : `${value} - ${details.servicesUplift} services / ${details.shippingUplift} shipping`;
+  return plainOption(label, value);
 }
 
 
